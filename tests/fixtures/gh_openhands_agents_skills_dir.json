@@ -1,0 +1,14 @@
+[
+  {
+    "type": "file",
+    "name": "custom-codereview-guide.md",
+    "path": ".agents/skills/custom-codereview-guide.md",
+    "sha": "cccccccccccccccccccccccccccccccccccccccc"
+  },
+  {
+    "type": "dir",
+    "name": "cross-repo-testing",
+    "path": ".agents/skills/cross-repo-testing",
+    "sha": "dddddddddddddddddddddddddddddddddddddddd"
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "type": "file",
+    "name": "documentation.md",
+    "path": ".openhands/microagents/documentation.md",
+    "sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  {
+    "type": "file",
+    "name": "glossary.md",
+    "path": ".openhands/microagents/glossary.md",
+    "sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  }
+]

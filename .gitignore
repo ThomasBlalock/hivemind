@@ -21,6 +21,7 @@ models/
 corpus/*.jsonl
 corpus/*.parquet
 corpus/index/
+corpus/audit_log.jsonl
 *.sqlite
 *.db
 

@@ -14,7 +14,12 @@ REPO = Path(__file__).resolve().parents[1]
 
 @pytest.fixture(scope="session")
 def toy_corpus_dir() -> Path:
-    return REPO / "corpus" / "skills"
+    """Snapshot of the original 3-skill toy corpus.
+
+    Kept under tests/fixtures/ so adding real skills to corpus/skills/ doesn't
+    break the unit-test contract (which assumes a known set of 3 ids).
+    """
+    return Path(__file__).parent / "fixtures" / "toy_skills"
 
 
 @pytest.fixture(scope="session")

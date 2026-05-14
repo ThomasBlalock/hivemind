@@ -17,6 +17,40 @@ def corpus() -> None:
     """Corpus operations."""
 
 
+@corpus.command("pull")
+@click.option(
+    "--sources",
+    multiple=True,
+    default=("anthropic_skills",),
+    help="Source adapters to pull. Repeat the flag to pull multiple.",
+)
+@click.option(
+    "--out",
+    "out_dir",
+    default=None,
+    type=click.Path(),
+    help="Directory to write skill markdown files into. Defaults to corpus/skills/.",
+)
+@click.option(
+    "--limit",
+    default=None,
+    type=int,
+    help="Optional cap on skills per source (testing / bandwidth control).",
+)
+def corpus_pull(sources: tuple[str, ...], out_dir: str | None, limit: int | None) -> None:
+    """Fetch external skill repos and write them as markdown files."""
+    from pathlib import Path
+
+    from hivemind.corpus.pull import pull_sources
+
+    out_path = Path(out_dir) if out_dir else default_skills_src()
+    written = pull_sources(list(sources), out_path, limit_per_source=limit)
+    for name, paths in written.items():
+        click.echo(f"  {name}: wrote {len(paths)} skill file(s) to {out_path}")
+    click.echo(f"Total skills written: {sum(len(v) for v in written.values())}")
+    click.echo("Next: run `hivemind corpus build` to ingest into skills.jsonl.")
+
+
 @corpus.command("build")
 @click.option("--src", "src_dir", default=None, type=click.Path(), help="Source markdown dir.")
 @click.option("--out", "out_path", default=None, type=click.Path(), help="Output jsonl path.")

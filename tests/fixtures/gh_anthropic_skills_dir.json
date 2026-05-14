@@ -1,0 +1,20 @@
+[
+  {
+    "type": "dir",
+    "name": "pdf",
+    "path": "skills/pdf",
+    "sha": "1111111111111111111111111111111111111111"
+  },
+  {
+    "type": "dir",
+    "name": "docx",
+    "path": "skills/docx",
+    "sha": "2222222222222222222222222222222222222222"
+  },
+  {
+    "type": "dir",
+    "name": "mcp-builder",
+    "path": "skills/mcp-builder",
+    "sha": "3333333333333333333333333333333333333333"
+  }
+]
