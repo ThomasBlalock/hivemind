@@ -7,6 +7,7 @@ Goal: produce repeatable scores for (agent × model × injection policy) on codi
 - [benchmarks.md](benchmarks.md) — task suites
 - [inspect_ai.md](inspect_ai.md) — runner of choice
 - [cost_tracking.md](cost_tracking.md) — LiteLLM proxy for normalized cost
+- [reporting.md](reporting.md) — sweep CSV → aggregation, markdown report, perf-vs-cost chart
 
 ## Why these tools
 

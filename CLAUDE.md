@@ -38,6 +38,7 @@ Full design lives under `docs/`. The implementation plan with checkboxes is `tod
 |---|---|
 | Project-wide architecture or data flow | `@docs/architecture.md` |
 | The evaluation harness (Inspect AI, benchmarks, cost) | `@docs/evaluation/README.md` |
+| The reporting pipeline (sweep CSV → markdown + perf-vs-cost chart) | `@docs/evaluation/reporting.md` |
 | Agent harness integration (OpenHands, Hermes, API contract) | `@docs/agent_harness/README.md` |
 | The skills corpus (sources, ingestion, audit) | `@docs/skills_corpus/README.md` |
 | A context injection policy | `@docs/context_injection/README.md` |
