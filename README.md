@@ -21,30 +21,10 @@ This approach creates critical structural bottlenecks:
 
 HiveMind treats **context injection as a dynamic, highly optimizable search and synthesis problem.** Instead of hardcoding a massive block of system instructions, your agent harness queries the HiveMind runtime middleware before or during an inference turn. HiveMind analyzes the active conversation state, RAGs against a highly curated, secure corpus of skills, and serves an optimized token payload designed specifically to maximize downstream task success.
 
-```
-[ Active Agent State ] ──┐
-                         ▼
-             ┌────────────────────────┐
-             │   HiveMind Middleware  │
-             └────────────────────────┘
-                         │
-         ┌───────────────┴───────────────┐
-         ▼                               ▼
-  (System 1: Hybrid)            (System 2: DSPy)
-  Precision Retrieval          Compiled Sequences
-         │                               │
-         └───────────────┬───────────────┘
-                         ▼
-             [ Optimized Token Payload ]
-                         │
-                         ▼
-             Target LLM Inference Turn
-```
-
-### Why Developers & Researchers Use HiveMind
-* **The Cost-Performance Frontier:** By dynamically scoping context, you can strip out irrelevant tokens. We are iteratively benchmarking context-injection policies until mid-tier models (e.g., Llama-3-8B / Claude 3.5 Haiku) match the coding task success rates of unoptimized frontier models.
-* **Plug-and-Play Extensibility:** Drop bloated static prompts from your application code. Integrate our lightweight agent harness middleware (compatible with frameworks like OpenHands and Hermes) to instantly access a globally optimized skills library.
-* **Autonomous Evolution:** HiveMind is designed to close the loop. By mapping task inputs, injected context, and end-state evaluations, we continuously train online bandit policies and RL-driven synthesis models to improve global context injection over time.
+### Why Developers & Researchers Will Use HiveMind
+* **The Cost-Performance Frontier:** By dynamically scoping context, you can strip out irrelevant tokens. I am iteratively benchmarking context-injection policies until mid-tier models match the coding task success rates of unoptimized frontier models.
+* **Plug-and-Play Extensibility:** Drop bloated static prompts from your application code. Integrate our lightweight agent harness middleware (meant to be compatible with frameworks like Hermes Agent) to instantly access a globally optimized skills library.
+* **Autonomous Evolution:** HiveMind is designed to close the loop. By mapping task inputs, injected context, and end-state evaluations, it will continuously train to improve global context injection over time.
 
 ---
 
