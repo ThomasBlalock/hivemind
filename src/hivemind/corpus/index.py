@@ -52,9 +52,10 @@ class HybridIndex:
         vectors = embedder.embed(dense_texts) if skills else np.zeros((0, embedder.dim), dtype=np.float32)
 
         sparse_corpus = [_sparse_doc_text(s) for s in skills]
-        tokens = bm25s.tokenize(sparse_corpus, stopwords="en")
+        # show_progress=False keeps CLI output clean during sweeps.
+        tokens = bm25s.tokenize(sparse_corpus, stopwords="en", show_progress=False)
         bm25 = bm25s.BM25()
-        bm25.index(tokens)
+        bm25.index(tokens, show_progress=False)
 
         return cls(skills=skills, dense_vectors=vectors, bm25=bm25, embedder_name=embedder.name)
 
@@ -71,8 +72,8 @@ class HybridIndex:
     def sparse_search(self, query: str, k: int) -> list[tuple[int, float]]:
         if len(self.skills) == 0:
             return []
-        q_tokens = bm25s.tokenize([query], stopwords="en")
+        q_tokens = bm25s.tokenize([query], stopwords="en", show_progress=False)
         k = min(k, len(self.skills))
-        results, scores = self.bm25.retrieve(q_tokens, k=k)
+        results, scores = self.bm25.retrieve(q_tokens, k=k, show_progress=False)
         # results is shape (1, k), scores is (1, k)
         return [(int(results[0][i]), float(scores[0][i])) for i in range(k)]

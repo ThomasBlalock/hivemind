@@ -12,15 +12,13 @@ from __future__ import annotations
 
 import json
 
-from hivemind.api import hub
-from hivemind.policies.base import Message, SynthesizeRequest
-
 # Import for side-effect policy registration.
 import hivemind.policies.baseline  # noqa: F401
 import hivemind.policies.dspy_compiled  # noqa: F401
 import hivemind.policies.hybrid_retrieval  # noqa: F401
 import hivemind.policies.online_bandit  # noqa: F401
-
+from hivemind.api import hub
+from hivemind.policies.base import Message, SynthesizeRequest
 
 QUERIES = [
     "I bisected a regression and found the bad commit; what now?",

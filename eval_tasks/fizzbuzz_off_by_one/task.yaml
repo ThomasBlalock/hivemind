@@ -1,0 +1,7 @@
+id: fizzbuzz_off_by_one
+prompt: |
+  The file `fizzbuzz.py` contains a fizzbuzz function with a bug. The unit
+  test in `test_fizzbuzz.py` fails. Fix the bug so the test passes.
+
+  Do not modify the tests. Edit `fizzbuzz.py` only.
+test_cmd: pytest test_fizzbuzz.py -x -q

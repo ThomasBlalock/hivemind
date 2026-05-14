@@ -1,0 +1,8 @@
+id: regex_backref
+prompt: |
+  The function `find_repeated_words` in `repeats.py` is supposed to find
+  consecutive duplicate words in a string (e.g. "the the cat" → ["the"]).
+  The unit test in `test_repeats.py` fails. Fix the regex so the test passes.
+
+  Do not modify the tests. Edit `repeats.py` only.
+test_cmd: pytest test_repeats.py -x -q
