@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# venv
+.venv/
+venv/
+
+# Build artifacts
+build/
+dist/
+
+# HiveMind runtime
+runs/
+data/
+models/
+corpus/*.jsonl
+corpus/*.parquet
+corpus/index/
+*.sqlite
+*.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store

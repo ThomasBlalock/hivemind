@@ -1,0 +1,66 @@
+[project]
+name = "hivemind"
+version = "0.0.1"
+description = "Dynamic Context Optimization Hub — a Skill Retrieval Augmentation service for agent harnesses."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+dependencies = [
+    "pydantic>=2.6",
+    "fastapi>=0.110",
+    "uvicorn>=0.27",
+    "httpx>=0.27",
+    "numpy>=1.26",
+    "tiktoken>=0.6",
+    "bm25s>=0.1.10",
+    "python-frontmatter>=1.1",
+    "click>=8.1",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+# Real backends — install when you have API keys and want live calls.
+live = [
+    "voyageai>=0.2",
+    "cohere>=5.0",
+    "anthropic>=0.39",
+    "lancedb>=0.10",
+    "litellm>=1.40",
+]
+# Evaluation harness.
+eval = [
+    "inspect-ai>=0.3",
+]
+# Offline optimizer for System 2.
+dspy = [
+    "dspy-ai>=2.4",
+]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.4",
+]
+
+[project.scripts]
+hivemind = "hivemind.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]

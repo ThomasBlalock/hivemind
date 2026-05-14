@@ -1,0 +1,23 @@
+# LiteLLM proxy config. See docs/evaluation/cost_tracking.md.
+# Run:
+#   litellm --config src/hivemind/eval/litellm_proxy_config.yaml --port 4000
+#
+# Then point Inspect AI / Anthropic SDK at http://localhost:4000.
+
+model_list:
+  - model_name: claude-sonnet-4-6
+    litellm_params:
+      model: anthropic/claude-sonnet-4-6
+      api_key: os.environ/ANTHROPIC_API_KEY
+  - model_name: claude-opus-4-7
+    litellm_params:
+      model: anthropic/claude-opus-4-7
+      api_key: os.environ/ANTHROPIC_API_KEY
+  - model_name: claude-haiku-4-5
+    litellm_params:
+      model: anthropic/claude-haiku-4-5
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+general_settings:
+  database_url: sqlite:///litellm.db
+  store_model_in_db: false
