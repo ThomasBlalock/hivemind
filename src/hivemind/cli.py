@@ -54,6 +54,27 @@ def serve(host: str, port: int, policy: str | None) -> None:
     uvicorn.run("hivemind.api.app:app", host=host, port=port, log_level="info")
 
 
+@main.group()
+def dspy() -> None:
+    """DSPy / System 2 operations."""
+
+
+@dspy.command("train")
+@click.option("--out-version", default="v1", help="Artifact version directory under models/dspy/.")
+@click.option("--max-lm-calls", type=int, default=200, help="Hard cap on LM calls.")
+@click.option("--dry-run", is_flag=True, help="Use dspy.DummyLM; no network calls.")
+def dspy_train(out_version: str, max_lm_calls: int, dry_run: bool) -> None:
+    """Compile DSPy artifacts (distillations, selector, order_prior)."""
+    from hivemind.policies.dspy_train import main as train_main
+
+    argv = ["--out-version", out_version, "--max-lm-calls", str(max_lm_calls)]
+    if dry_run:
+        argv.append("--dry-run")
+    rc = train_main(argv)
+    if rc != 0:
+        raise SystemExit(rc)
+
+
 @main.command("policies")
 def policies_cmd() -> None:
     """List registered policies."""

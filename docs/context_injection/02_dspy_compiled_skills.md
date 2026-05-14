@@ -38,15 +38,6 @@ DSPy's MIPROv2 / GEPA optimizers do the heavy lifting. We don't fine-tune any mo
 - **Budget cap:** 10× the cost of one full baseline eval run, configurable in `src/policies/dspy_compiled/config.yaml`.
 - **Warm start:** initialize selection from System 1's rerank-score threshold; initialize distillations as identity (raw body).
 
-## Risks and mitigations
-
-| Risk | Mitigation |
-|---|---|
-| Overfits to eval distribution | Family-level split; ship only if held-out gain ≈ train gain |
-| Distillation drops critical instructions | Every distilled skill spot-checked by a human before production; diff against raw saved in `models/dspy/v<n>/distillations.jsonl` |
-| Optimization cost balloons | Hard budget cap; parallelize across 16 workers; cache LLM calls aggressively |
-| Per-model proliferation | Initially compile for ≤3 models (Haiku, Sonnet, Opus); skip distillation for low-traffic models |
-
 ## What this still can't do
 
 | Limitation | Fixed by |
@@ -57,11 +48,41 @@ DSPy's MIPROv2 / GEPA optimizers do the heavy lifting. We don't fine-tune any mo
 
 ## Implementation
 
-- File: `src/policies/dspy_compiled.py` (policy) + `src/policies/dspy_compiled/train.py` (optimizer)
-- Compiled artifacts under `models/dspy/v<n>/` (versioned with the corpus sha)
-- Same [API](../agent_harness/integration.md) as System 1; clients see only `policy: "dspy_compiled@v1"` in the response
+| Concern | File |
+|---|---|
+| Serve-time policy (no dspy import) | `src/hivemind/policies/dspy_compiled.py` |
+| DSPy programs (distill / select / order) | `src/hivemind/policies/dspy_programs.py` |
+| Offline trainer + LM-budget cap | `src/hivemind/policies/dspy_train.py` |
+| CLI entry point | `hivemind dspy train [--dry-run] [--out-version v1] [--max-lm-calls N]` |
+| Compiled artifacts | `models/dspy/<version>/{distillations.jsonl, selector.json, order_prior.json}` |
+
+The serve-time policy gracefully degrades to System 1 behavior when artifacts are missing.
+
+**Reward signal**: the trainer currently uses a tiny synthetic reward
+(distillation is "shorter and contains an action keyword"; selector is matched
+against a hand-labeled positive/negative pair). The real reward comes from the
+eval-harness success-rate-delta and slots in via `dspy_train._distill_reward` /
+`_select_reward`. Once Phase 1 measurements stabilize, those functions wrap a
+call into the harness instead of the synthetic stand-in.
+
+**LM-call budget**: hard cap via `--max-lm-calls`; the trainer aborts with
+`RuntimeError("LM call budget exceeded")` before exceeding it.
+
+**Dry-run mode**: set `HIVEMIND_DSPY_DRY_RUN=1` (or pass `--dry-run`) to install
+a `dspy.DummyLM` with canned answers. This is the path tests use, and it lets
+the user inspect artifact shapes without touching the network.
+
+## Risks and mitigations
+
+| Risk | Mitigation |
+|---|---|
+| Overfits to eval distribution | Family-level split; ship only if held-out gain ≈ train gain |
+| Distillation drops critical instructions | Every distilled skill spot-checked by a human before production; diff against raw saved in `models/dspy/v<n>/distillations.jsonl` |
+| Optimization cost balloons | Hard budget cap; parallelize across 16 workers; cache LLM calls aggressively |
+| Per-model proliferation | Initially compile for ≤3 models (Haiku, Sonnet, Opus); skip distillation for low-traffic models |
+| **Synthetic reward distorts training signal** | Document explicitly; gate "ship to production" on swapping in the eval-harness reward. The serve-time policy must remain System-1-graceful while artifacts are stand-ins. |
 
 ## Dependencies
 
-- `dspy-ai`
-- All of System 1's dependencies (this policy inherits its retrieval frontend; only the selection/ordering tail changes)
+- `dspy-ai` (`pip install -e '.[dspy]'`) — required only by the trainer; the serve-time policy doesn't import it.
+- All of System 1's dependencies (this policy inherits its retrieval frontend; only the selection/ordering tail changes).
