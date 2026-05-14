@@ -46,7 +46,7 @@ class HybridIndex:
     embedder_name: str
 
     @classmethod
-    def build(cls, skills: list[Skill], embedder: Embedder | None = None) -> "HybridIndex":
+    def build(cls, skills: list[Skill], embedder: Embedder | None = None) -> HybridIndex:
         embedder = embedder or get_embedder()
         dense_texts = [_dense_doc_text(s) for s in skills]
         vectors = embedder.embed(dense_texts) if skills else np.zeros((0, embedder.dim), dtype=np.float32)

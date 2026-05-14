@@ -9,7 +9,6 @@ import pytest
 from hivemind.corpus.ingest import ingest_directory, write_jsonl
 from hivemind.corpus.schema import Skill
 
-
 REPO = Path(__file__).resolve().parents[1]
 
 

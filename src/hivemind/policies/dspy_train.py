@@ -30,7 +30,8 @@ def _require_dspy():
 
 def main(out_version: str = "v1") -> Path:
     _require_dspy()
-    skills = [s for s in load_jsonl(default_corpus_path()) if s.audit_status == "passed"]
+    # Load the audit-passed corpus; the real optimizer below would iterate over it.
+    _ = [s for s in load_jsonl(default_corpus_path()) if s.audit_status == "passed"]
     out_dir = models_dir() / "dspy" / out_version
     out_dir.mkdir(parents=True, exist_ok=True)
 

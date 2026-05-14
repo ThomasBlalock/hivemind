@@ -17,15 +17,13 @@ from collections import Counter
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 
-from hivemind.api import hub
-from hivemind.policies import SynthesizeRequest, SynthesizeResponse, list_policies
-
 # Ensure all policy modules get imported so they register.
 import hivemind.policies.baseline  # noqa: F401
-import hivemind.policies.hybrid_retrieval  # noqa: F401
 import hivemind.policies.dspy_compiled  # noqa: F401
+import hivemind.policies.hybrid_retrieval  # noqa: F401
 import hivemind.policies.online_bandit  # noqa: F401
-
+from hivemind.api import hub
+from hivemind.policies import SynthesizeRequest, SynthesizeResponse, list_policies
 
 _DEFAULT_POLICY = os.environ.get("HIVEMIND_DEFAULT_POLICY", "hybrid_retrieval")
 

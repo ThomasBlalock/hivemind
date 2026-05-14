@@ -26,7 +26,7 @@ from hivemind.config import default_corpus_path, models_dir
 from hivemind.corpus.ingest import load_jsonl
 from hivemind.corpus.schema import Skill
 from hivemind.policies.base import Chunk, SynthesizeRequest, SynthesizeResponse
-from hivemind.policies.hybrid_retrieval import HybridRetrievalPolicy, _build_query
+from hivemind.policies.hybrid_retrieval import HybridRetrievalPolicy
 
 
 class DSPyCompiledPolicy:

@@ -17,9 +17,9 @@ This approach creates critical structural bottlenecks:
 
 ---
 
-## ⚡ Enter HiveMind
+## Enter HiveMind
 
-HiveMind treats **context injection as a dynamic, highly optimizable search and synthesis problem.** Instead of hardcoding a massive block of system instructions, your agent harness queries the HiveMind runtime middleware before an inference turn. HiveMind analyzes the active conversation state, searches a highly curated, secure corpus of skills, and serves an ultra-low-latency, optimized token payload designed specifically to maximize downstream task success.
+HiveMind treats **context injection as a dynamic, highly optimizable search and synthesis problem.** Instead of hardcoding a massive block of system instructions, your agent harness queries the HiveMind runtime middleware before or during an inference turn. HiveMind analyzes the active conversation state, RAGs against a highly curated, secure corpus of skills, and serves an optimized token payload designed specifically to maximize downstream task success.
 
 ```
 [ Active Agent State ] ──┐

@@ -14,7 +14,6 @@ meaningful as feedback accumulates.
 from __future__ import annotations
 
 import hashlib
-import json
 import time
 from pathlib import Path
 
@@ -23,7 +22,7 @@ import numpy as np
 from hivemind.config import default_corpus_path, models_dir
 from hivemind.corpus.ingest import load_jsonl
 from hivemind.corpus.schema import Skill
-from hivemind.policies.base import Chunk, Message, SynthesizeRequest, SynthesizeResponse
+from hivemind.policies.base import Chunk, SynthesizeRequest, SynthesizeResponse
 from hivemind.policies.dspy_compiled import DSPyCompiledPolicy
 
 FEATURE_DIM = 32  # state featurization size; modest, easy to learn

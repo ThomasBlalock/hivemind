@@ -14,8 +14,6 @@ import hashlib
 import time
 from collections import OrderedDict
 
-import numpy as np
-
 from hivemind.corpus.index import HybridIndex
 from hivemind.corpus.schema import Skill
 from hivemind.embeddings import Embedder, get_embedder
@@ -180,8 +178,8 @@ class HybridRetrievalPolicy:
 
 # Convenience for the registry.
 def _factory_from_default_corpus():
-    from hivemind.corpus.ingest import load_jsonl
     from hivemind.config import default_corpus_path
+    from hivemind.corpus.ingest import load_jsonl
 
     skills = load_jsonl(default_corpus_path())
     # Only serve audit-passed skills. Manual-review ones are excluded until

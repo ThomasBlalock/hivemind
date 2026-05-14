@@ -7,8 +7,8 @@ emits `corpus/skills.jsonl`. See docs/skills_corpus/ingestion.md.
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 import frontmatter
 
