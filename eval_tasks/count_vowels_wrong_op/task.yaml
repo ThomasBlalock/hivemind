@@ -1,0 +1,7 @@
+id: count_vowels_wrong_op
+prompt: |
+  The function `count_vowels` in `vowels.py` counts vowels in a string. The
+  unit test in `test_vowels.py` fails. Fix the bug so the test passes.
+
+  Do not modify the tests. Edit `vowels.py` only.
+test_cmd: pytest test_vowels.py -x -q

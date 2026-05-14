@@ -1,0 +1,8 @@
+id: sort_by_length_stable
+prompt: |
+  The function `sort_by_length` in `sort_words.py` should return words sorted
+  by length, breaking ties in their original input order. The current
+  implementation re-shuffles ties.
+
+  Do not modify the tests. Edit `sort_words.py` only.
+test_cmd: pytest test_sort_words.py -x -q

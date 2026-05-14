@@ -1,0 +1,8 @@
+id: dict_default_mutability
+prompt: |
+  The function `make_counter_table` in `counters.py` is supposed to return a
+  dict of fresh per-key counters. Successive calls share state because the
+  default argument is a mutable singleton. Fix the bug.
+
+  Do not modify the tests. Edit `counters.py` only.
+test_cmd: pytest test_counters.py -x -q

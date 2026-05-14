@@ -1,0 +1,9 @@
+id: context_manager_leak
+prompt: |
+  The class `SafeWriter` in `safe_writer.py` is supposed to be a context
+  manager that always closes its underlying file — even when the body raises.
+  The current implementation only closes on successful exit, so exceptions
+  leak the file handle. Fix the context-manager semantics.
+
+  Do not modify the tests. Edit `safe_writer.py` only.
+test_cmd: pytest test_safe_writer.py -x -q

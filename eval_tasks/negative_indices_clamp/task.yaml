@@ -1,0 +1,9 @@
+id: negative_indices_clamp
+prompt: |
+  The function `safe_get` in `safe_get.py` should return a default value for
+  any out-of-bounds index — including negative indices. The unit test in
+  `test_safe_get.py` fails because negative indices wrap around like Python's
+  default list indexing. Fix the bug.
+
+  Do not modify the tests. Edit `safe_get.py` only.
+test_cmd: pytest test_safe_get.py -x -q

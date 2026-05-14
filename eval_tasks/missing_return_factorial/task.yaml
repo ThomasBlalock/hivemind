@@ -1,0 +1,7 @@
+id: missing_return_factorial
+prompt: |
+  The function `factorial` in `factorial.py` is missing a return statement on
+  one of its branches. The unit test in `test_factorial.py` fails. Fix it.
+
+  Do not modify the tests. Edit `factorial.py` only.
+test_cmd: pytest test_factorial.py -x -q

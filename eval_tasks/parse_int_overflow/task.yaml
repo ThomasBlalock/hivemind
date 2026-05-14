@@ -1,0 +1,9 @@
+id: parse_int_overflow
+prompt: |
+  The function `parse_uint16` in `parse_int.py` should parse a string into an
+  unsigned 16-bit integer (0..65535). Out-of-range inputs and non-numeric
+  inputs must raise ValueError. The current implementation accepts negative
+  numbers and values > 65535. Fix it.
+
+  Do not modify the tests. Edit `parse_int.py` only.
+test_cmd: pytest test_parse_int.py -x -q

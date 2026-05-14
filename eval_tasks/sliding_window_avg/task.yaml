@@ -1,0 +1,10 @@
+id: sliding_window_avg
+prompt: |
+  `sliding_window_avg(xs, k)` in `window_avg.py` should return the rolling
+  average over every window of size k. The current implementation is
+  O(n*k) and silently misbehaves when ``k > len(xs)``. Refactor to use the
+  standard O(n) prefix-sum technique AND return an empty list when k is
+  greater than the input length.
+
+  Do not modify the tests. Edit `window_avg.py` only.
+test_cmd: pytest test_window_avg.py -x -q

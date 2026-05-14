@@ -1,0 +1,8 @@
+id: strip_only_trailing
+prompt: |
+  The function `strip_trailing_whitespace` in `strip_trailing.py` should remove
+  trailing whitespace from each line but preserve leading whitespace
+  (indentation). The current implementation also strips leading whitespace.
+
+  Do not modify the tests. Edit `strip_trailing.py` only.
+test_cmd: pytest test_strip_trailing.py -x -q

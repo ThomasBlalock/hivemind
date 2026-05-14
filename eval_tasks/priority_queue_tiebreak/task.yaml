@@ -1,0 +1,10 @@
+id: priority_queue_tiebreak
+prompt: |
+  `PriorityQueue.pop()` in `pq.py` should return items in priority order,
+  breaking ties by FIFO (the item pushed first wins). The current
+  implementation breaks ties by comparing the items themselves, which crashes
+  for unorderable types and otherwise reorders ties non-deterministically.
+  Fix the implementation.
+
+  Do not modify the tests. Edit `pq.py` only.
+test_cmd: pytest test_pq.py -x -q

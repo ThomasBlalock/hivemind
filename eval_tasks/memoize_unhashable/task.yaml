@@ -1,0 +1,9 @@
+id: memoize_unhashable
+prompt: |
+  The decorator `memoize` in `memo.py` caches function results keyed on the
+  arguments. The current implementation crashes with TypeError on calls with
+  unhashable arguments (lists, dicts). It should fall back to recomputing
+  without caching for those calls — never propagate the TypeError.
+
+  Do not modify the tests. Edit `memo.py` only.
+test_cmd: pytest test_memo.py -x -q

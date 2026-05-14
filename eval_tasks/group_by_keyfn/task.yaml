@@ -1,0 +1,8 @@
+id: group_by_keyfn
+prompt: |
+  The function `group_by` in `group_by.py` should group items by a key
+  function, preserving order within each group. The current implementation
+  reorders items inside a group. Fix it.
+
+  Do not modify the tests. Edit `group_by.py` only.
+test_cmd: pytest test_group_by.py -x -q
