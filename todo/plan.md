@@ -24,6 +24,8 @@ Goal: measure (agent × model × injection policy) on coding tasks, with cost.
 - [x] [`docs/evaluation/inspect_ai.md`](../docs/evaluation/inspect_ai.md) — runner
 - [x] [`docs/evaluation/cost_tracking.md`](../docs/evaluation/cost_tracking.md) — LiteLLM proxy
 - [x] Scaffold `src/hivemind/eval/` with Inspect AI task stubs (`swe_bench_lite.py`, `aider_polyglot.py`, `policy_adapter.py`, `report.py`, `litellm_proxy_config.yaml`)
+- [x] Reporting pipeline: sweep CSV → aggregation, markdown report, perf-vs-cost chart (`src/hivemind/eval/report.py`, `scripts/build_report.py`, `scripts/synthesize_sweep_csv.py`). See [`../docs/evaluation/reporting.md`](../docs/evaluation/reporting.md).
+- [x] Eval task catalog grown to 14 self-contained bug-fix tasks across easy/medium/hard tiers (`eval_tasks/` + `tests/test_eval_tasks.py`).
 - [ ] **Deferred (needs live API spend):** reproduce a published SWE-bench-Lite number for one model
 
 ## Phase 2 — Agent harness integration
@@ -45,7 +47,10 @@ Goal: measure (agent × model × injection policy) on coding tasks, with cost.
 - [x] [`docs/skills_corpus/security_audit.md`](../docs/skills_corpus/security_audit.md)
 - [x] Implement ingestion pipeline (`src/hivemind/corpus/{schema,security_audit,ingest,index}.py`) and toy corpus (3 skills under `corpus/skills/`)
 - [x] `hivemind corpus build` produces `corpus/skills.jsonl`
-- [ ] **Deferred:** pull and audit a full 200–500 skill corpus from upstream sources
+- [x] Source adapters at pinned commits: `anthropic_skills`, `openhands_microagents` (`src/hivemind/corpus/sources/`).
+- [x] `hivemind corpus pull` CLI; audit-log writes (`corpus/audit_log.jsonl`, gitignored); `corpus/PROVENANCE.md`.
+- [x] 23 real skills pulled and ingested (22 audit-pass, 1 false-positive logged).
+- [ ] **Deferred:** scale to 200–500 skills (more adapters + manual whitelist pass)
 
 ## Phase 4 — Baselines
 
@@ -64,15 +69,17 @@ Each system has its own doc under [`docs/context_injection/`](../docs/context_in
 - [x] [`docs/context_injection/02_dspy_compiled_skills.md`](../docs/context_injection/02_dspy_compiled_skills.md) — System 2 (medium)
 - [x] [`docs/context_injection/03_online_bandit.md`](../docs/context_injection/03_online_bandit.md) — System 3 (advanced)
 - [x] Implement System 1 (`HybridRetrievalPolicy`) — full pipeline: query construction → BM25 + dense → RRF → rerank → threshold → budget pack
-- [x] Implement System 2 scaffold (`DSPyCompiledPolicy`) — serves distilled bodies when artifacts exist; degrades to System 1 otherwise. Trainer skeleton in `dspy_train.py`.
+- [x] Implement System 2 (`DSPyCompiledPolicy` + `dspy_programs.py` + `dspy_train.py`) — three DSPy modules (SkillDistiller / SkillSelector / SkillOrderer), trainer with hard LM-call budget, DummyLM dry-run path. Selector logits and order priors now feed the serve-time policy in addition to distilled bodies.
+- [x] `hivemind dspy train [--dry-run]` CLI; writes `models/dspy/<v>/distillations.jsonl + selector.json + order_prior.json`.
 - [x] Implement System 3 scaffold (`OnlineBanditPolicy`) — per-skill LinUCB over a hashed state featurization; `record_feedback` updates arms; warm-starts from System 2.
-- [ ] **Deferred:** run System 2 offline optimization (needs Phase 1 live, DSPy install, funded LLM key)
+- [ ] **Deferred:** swap synthetic reward in `dspy_train` for the eval-harness success-rate-delta (needs Phase 1 live + funded LLM key)
 - [ ] **Deferred:** accumulate online feedback for System 3 (needs real harness traffic)
 
 ## Phase 6 — Comparison & iteration
 
+- [x] Cost-free dry-run of the reporting pipeline (`synthesize_sweep_csv.py` → `build_report.py` produces markdown + perf-vs-cost chart).
 - [ ] **Deferred (needs live API spend):** run baselines A, B + Systems 1, 2, 3 through the eval suite
-- [ ] **Deferred:** produce the perf-vs-cost graph called for in [`../CLAUDE.md`](../CLAUDE.md)
+- [ ] **Deferred:** produce the perf-vs-cost graph called for in [`../CLAUDE.md`](../CLAUDE.md) on real data
 - [ ] **Deferred:** iterate until a mid-tier model + injection matches a top-tier model bare
 
 ## Phase 7 — Serving layer
