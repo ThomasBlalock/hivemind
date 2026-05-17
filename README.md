@@ -1,6 +1,6 @@
 # HiveMind: Dynamic Context Optimization Hub
 
-**Stop statically stuffing your LLM's context window with skills.** HiveMind is an open-source research initiative and production-grade runtime engine that dynamically injects the mathematically optimal sequence of skills, instructions, and tools into an agent's reasoning stream. 
+**Stop statically stuffing your LLM's context window with skills.** HiveMind is an open-source that dynamically injects the mathematically optimal sequence of skills, instructions, and tools into an agent's reasoning stream. 
 
 The goal: **Unlock frontier-model performance from mid-tier models at half the latency and token cost.**
 
@@ -67,25 +67,19 @@ This approach creates critical structural bottlenecks:
 
 HiveMind treats **context injection as a dynamic, highly optimizable search and synthesis problem.** Instead of hardcoding a massive block of system instructions, your agent harness queries the HiveMind runtime middleware before or during an inference turn. HiveMind analyzes the active conversation state, RAGs against a highly curated, secure corpus of skills, and serves an optimized token payload designed specifically to maximize downstream task success.
 
-## Why Developers & Researchers Will Use HiveMind
+## Why This is Useful
 * **The Cost-Performance Frontier:** By dynamically scoping context, you can strip out irrelevant tokens. I am iteratively benchmarking context-injection policies until mid-tier models match the coding task success rates of unoptimized frontier models.
 * **Plug-and-Play Extensibility:** Drop bloated static prompts from your application code. Integrate our lightweight agent harness middleware (meant to be compatible with frameworks like Hermes Agent) to instantly access a globally optimized skills library.
 * **Autonomous Evolution:** HiveMind is designed to close the loop. By mapping task inputs, injected context, and end-state evaluations, it will continuously train to improve global context injection over time.
 
 ---
 
-## Production-Grade Security & Constraints
+## Security & Constraints
 
 Injecting external context into dynamic execution loops introduces unique attack surfaces. HiveMind is engineered with stringent operational boundaries:
 * **Audited Corpus:** Every skill added to the global repository undergoes strict automated static analysis and sandboxed prompt-injection tests to prevent malicious instruction overrides.
 * **Publicly Verifiable Infrastructure:** Built on transparent, auditable release pipelines so application developers can trust the runtime payload unconditionally.
 * **Strict Latency Budgets:** Retrieval and compilation policies are engineered using highly optimized retrieval engines and lightweight synthesis models to guarantee negligible TTFT overhead.
-
----
-
-## Project Roadmap & Architecture
-
-I am building in transparent, rigorous phases. Check our active progress and contribute to specific modules below.
 
 ---
 
