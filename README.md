@@ -1,6 +1,6 @@
 # HiveMind: Dynamic Context Optimization Hub
 
-**Stop statically stuffing your LLM's context window with skills.** HiveMind is an open-source that dynamically injects the mathematically optimal sequence of skills, instructions, and tools into an agent's reasoning stream. 
+**Stop statically stuffing your LLM's context window with skills.** HiveMind is an open-source skills hub observer that dynamically injects the mathematically optimal sequence of skills, instructions, and tools into an agent's reasoning stream. 
 
 The goal: **Unlock frontier-model performance from mid-tier models at half the latency and token cost.**
 
