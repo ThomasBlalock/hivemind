@@ -28,10 +28,16 @@ import os
 import sys
 from pathlib import Path
 
-from hivemind.config import default_corpus_path, models_dir
-from hivemind.corpus.ingest import load_jsonl
-from hivemind.corpus.schema import Skill
-from hivemind.tokenize import count_tokens
+from dotenv import load_dotenv
+
+# Pull OPENROUTER_API_KEY (or whichever provider HIVEMIND_DSPY_LM routes to)
+# out of repo-root .env before configure_lm() reads the environment.
+load_dotenv()
+
+from hivemind.config import default_corpus_path, models_dir  # noqa: E402
+from hivemind.corpus.ingest import load_jsonl  # noqa: E402
+from hivemind.corpus.schema import Skill  # noqa: E402
+from hivemind.tokenize import count_tokens  # noqa: E402
 
 # Target models we distill for. Keep this small until per-model lift is proven.
 DEFAULT_TARGET_MODELS = (

@@ -3,7 +3,7 @@
 Real run:
     export OPENROUTER_API_KEY=sk-or-...
     python scripts/run_harness_sweep.py \\
-        --models 'openrouter/anthropic/claude-haiku-4-5' 'openrouter/anthropic/claude-sonnet-4-6' \\
+        --models 'openrouter/anthropic/claude-haiku-4.5' 'openrouter/anthropic/claude-sonnet-4.6' \\
         --policies baseline_a baseline_b hybrid_retrieval \\
         --tasks eval_tasks/fizzbuzz_off_by_one eval_tasks/regex_backref \\
         --runs 1 \\
@@ -26,8 +26,13 @@ from dataclasses import asdict
 from pathlib import Path
 
 import yaml
+from dotenv import load_dotenv
 
-from hivemind.harness.mini_swe_runner import HarnessResult, TaskSpec, run_task
+# Pull OPENROUTER_API_KEY (and anything else) out of repo-root .env before
+# the OPENROUTER_API_KEY check below runs.
+load_dotenv()
+
+from hivemind.harness.mini_swe_runner import HarnessResult, TaskSpec, run_task  # noqa: E402
 
 
 def load_task(task_dir: Path) -> TaskSpec:
@@ -83,7 +88,7 @@ def _build_model(model_name: str, dry_run: bool):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--models", nargs="+", default=["openrouter/anthropic/claude-haiku-4-5"])
+    p.add_argument("--models", nargs="+", default=["openrouter/anthropic/claude-haiku-4.5"])
     p.add_argument(
         "--policies", nargs="+", default=["baseline_a", "baseline_b", "hybrid_retrieval"]
     )

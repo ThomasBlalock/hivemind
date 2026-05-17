@@ -13,23 +13,11 @@ The goal: **Unlock frontier-model performance from mid-tier models at half the l
 uv venv && source .venv/bin/activate
 uv pip install -e ".[dev]"
 
-# Build the toy corpus from corpus/skills/*.md
-hivemind corpus build
-
 # Run the API
 hivemind serve
 
 # In another shell
 curl -s localhost:8000/healthz
-```
-
-Out of the box, embeddings + rerankers are **stubbed** (deterministic hash-based) so nothing makes a network call. Install the `live` extra and set `VOYAGE_API_KEY` / `COHERE_API_KEY` to switch in real backends — see [docs/serving/README.md](docs/serving/README.md).
-
-## Tests
-
-```bash
-uv pip install -e ".[dev]"
-pytest
 ```
 
 ---

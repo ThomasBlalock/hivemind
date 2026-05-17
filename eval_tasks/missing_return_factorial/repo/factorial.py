@@ -4,5 +4,4 @@ def factorial(n: int) -> int:
         raise ValueError("n must be non-negative")
     if n <= 1:
         return 1
-    # BUG: missing `return` keyword on the recursive call.
-    n * factorial(n - 1)
+    return n * factorial(n - 1)

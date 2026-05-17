@@ -18,9 +18,9 @@ from pathlib import Path
 
 # Three models at different cost tiers; mean cost-per-run differs.
 MODELS = [
-    ("openrouter/anthropic/claude-haiku-4-5", 0.02),
-    ("openrouter/anthropic/claude-sonnet-4-6", 0.10),
-    ("openrouter/anthropic/claude-opus-4-7", 0.35),
+    ("openrouter/anthropic/claude-haiku-4.5", 0.02),
+    ("openrouter/anthropic/claude-sonnet-4.6", 0.10),
+    ("openrouter/anthropic/claude-opus-4.7", 0.35),
 ]
 
 # Three policies; success-rate deltas applied per task type.
