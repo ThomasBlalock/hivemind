@@ -82,8 +82,22 @@ def _build_model(model_name: str, dry_run: bool):
 
     # Real run: route everything through litellm. OpenRouter is reached via
     # the `openrouter/<provider>/<model>` model-name convention.
+    #
+    # Cost mapping: LiteLLM ships `model_prices_and_context_window.json` with
+    # every known model and per-token rates. New / preview models on
+    # OpenRouter are routinely missing from it. Override here by editing
+    # ``runs/litellm_model_registry.json``; the schema mirrors LiteLLM's
+    # upstream JSON (one entry per model). Set HIVEMIND_LITELLM_REGISTRY to
+    # point elsewhere, or unset to disable.
     from minisweagent.models.litellm_model import LitellmModel
-    return LitellmModel(model_name=model_name)
+    registry = os.environ.get(
+        "HIVEMIND_LITELLM_REGISTRY",
+        str(Path(__file__).resolve().parent.parent / "runs" / "litellm_model_registry.json"),
+    )
+    return LitellmModel(
+        model_name=model_name,
+        litellm_model_registry=registry if Path(registry).is_file() else None,
+    )
 
 
 def main():
@@ -115,9 +129,15 @@ def main():
         tmp_root = Path(tmp)
         for run_idx in range(args.runs):
             for task in base_tasks:
-                isolated = _copy_task_to_tmp(task, tmp_root / f"run{run_idx}")
                 for model_name in args.models:
                     for policy in args.policies:
+                        # Fresh repo per (run × task × model × policy). Sharing
+                        # one across cells let an earlier cell's fix leak into
+                        # every later pytest run, making every cell look 100%.
+                        cell_slug = f"{model_name.replace('/', '_')}__{policy}"
+                        isolated = _copy_task_to_tmp(
+                            task, tmp_root / f"run{run_idx}" / cell_slug
+                        )
                         # Rebuild the model per policy — DeterministicModel
                         # consumes its outputs list, so reusing across policies
                         # would shortchange later runs.

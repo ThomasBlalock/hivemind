@@ -5,11 +5,13 @@ Input: a CSV produced by ``scripts/run_harness_sweep.py``. Columns:
     cost_usd, n_calls, n_chunks, chunk_ids (comma-joined), error, submission
 
 Output: an aggregated dict (see :func:`aggregate`), a markdown report, and a
-PNG scatter plot of success-rate vs. mean-cost-per-task.
+benchmark-table chart styled like an LLM release paper (dark background,
+columns = (policy × base-model), rows = task-difficulty tiers + cost; best
+column highlighted in blue).
 
-Design choice: the project's stated end-state (CLAUDE.md) is the perf-vs-cost
-chart, so this module is the production path for that artifact, not a stub.
-See docs/evaluation/reporting.md.
+Design choice: the project's stated end-state (CLAUDE.md) is a perf-vs-cost
+view, so this module is the production path for that artifact. See
+docs/evaluation/reporting.md.
 """
 
 from __future__ import annotations
@@ -254,16 +256,25 @@ def markdown_report(agg: dict, *, title: str | None = None) -> str:
     lines.append(f"# {title or 'HiveMind sweep report'}")
     lines.append("")
 
-    # Headline: best cell by success rate (ties broken by lower cost).
+    # Headline: best cell by success rate (ties broken by lower cost) and
+    # spread vs the worst cell, so the reader can tell at a glance whether
+    # policies are differentiating.
     cells = agg["by_cell"]
     if cells:
         best = max(cells, key=lambda c: (c["success_rate"], -c["mean_cost"]))
+        worst = min(cells, key=lambda c: (c["success_rate"], -c["mean_cost"]))
+        spread = best["success_rate"] - worst["success_rate"]
         lines.append("## Headline")
         lines.append("")
         lines.append(
-            f"- Top cell: **{best['model']} × {best['policy']}** at "
+            f"- Best cell: **{best['model']} × {best['policy']}** — "
             f"{_fmt_pct(best['success_rate'])} success across {best['n_tasks']} task(s), "
             f"mean cost {_fmt_money(best['mean_cost'])}/run."
+        )
+        lines.append(
+            f"- Worst cell: **{worst['model']} × {worst['policy']}** — "
+            f"{_fmt_pct(worst['success_rate'])} success "
+            f"(spread vs best: {_fmt_pct(spread)})."
         )
         lines.append(f"- Total rows: {agg['n_rows']}")
         total_cost = sum(c["total_cost"] for c in cells)
@@ -332,6 +343,267 @@ def markdown_report(agg: dict, *, title: str | None = None) -> str:
 # Cycle of marker symbols by policy index. Stable across runs so the user can
 # eyeball comparisons between two reports.
 _MARKER_CYCLE = ("o", "s", "^", "D", "P", "X", "v", "*")
+
+
+# Task → difficulty tier. Mirrors eval_tasks/README.md. Used to group rows in
+# the benchmark-table chart.
+TASK_TIERS: dict[str, str] = {
+    # Easy
+    "fizzbuzz_off_by_one": "Easy",
+    "regex_backref": "Easy",
+    "count_vowels_wrong_op": "Easy",
+    "missing_return_factorial": "Easy",
+    "negative_indices_clamp": "Easy",
+    "strip_only_trailing": "Easy",
+    # Medium
+    "sort_by_length_stable": "Medium",
+    "dict_default_mutability": "Medium",
+    "parse_int_overflow": "Medium",
+    "group_by_keyfn": "Medium",
+    # Hard
+    "sliding_window_avg": "Hard",
+    "context_manager_leak": "Hard",
+    "priority_queue_tiebreak": "Hard",
+    "memoize_unhashable": "Hard",
+}
+
+_TIER_ORDER = ("Easy", "Medium", "Hard")
+
+
+# Human-friendly short labels for column headers — release-paper style.
+_POLICY_DISPLAY = {
+    "baseline_a@v1": ("No Injection", "raw model, no skills"),
+    "baseline_b@v1": ("Keyword Trigger", "current SOTA in OSS harnesses"),
+    "hybrid_retrieval@v1": ("HiveMind Hybrid", "BM25 + dense + rerank"),
+    "dspy_compiled@v1": ("HiveMind DSPy", "compiled distillations"),
+    "online_bandit@v1": ("HiveMind Bandit", "LinUCB over hashed state"),
+}
+
+
+def _short_model(name: str) -> str:
+    """Trim provider prefixes for tighter column headers."""
+    last = name.rsplit("/", 1)[-1]
+    return last.replace("claude-", "Claude ").replace("-", " ").title().replace("Claude ", "Claude ")
+
+
+def _column_label(policy: str) -> tuple[str, str]:
+    """Return (primary_label, subtitle) for a column header."""
+    primary, subtitle = _POLICY_DISPLAY.get(policy, (policy.split("@")[0], ""))
+    return primary, subtitle
+
+
+def _per_tier_success(rows: Sequence[dict], policy: str, model: str) -> dict[str, float | None]:
+    """Mean success rate per difficulty tier, plus 'Overall' and 'Mean cost'.
+
+    Returns None for tiers with no rows so the table can render '—' instead
+    of a misleading 0%.
+    """
+    tier_rows: dict[str, list[dict]] = {t: [] for t in _TIER_ORDER}
+    all_rows: list[dict] = []
+    for r in rows:
+        if r["policy"] != policy or r["model"] != model:
+            continue
+        all_rows.append(r)
+        tier = TASK_TIERS.get(r["task_id"])
+        if tier:
+            tier_rows[tier].append(r)
+    out: dict[str, float | None] = {}
+    for tier in _TIER_ORDER:
+        group = tier_rows[tier]
+        out[tier] = (sum(1 for r in group if r["success"]) / len(group)) if group else None
+    out["Overall"] = (
+        sum(1 for r in all_rows if r["success"]) / len(all_rows) if all_rows else None
+    )
+    out["Mean cost"] = statistics.fmean([r["cost_usd"] for r in all_rows]) if all_rows else None
+    return out
+
+
+_ROW_SPECS = (
+    ("Easy", "Easy tier", "off-by-ones, simple bug fixes"),
+    ("Medium", "Medium tier", "mutable defaults, parsing, grouping"),
+    ("Hard", "Hard tier", "concurrency, memoization, heaps"),
+    ("Overall", "Overall success", "all 14 tasks, mean of per-task success"),
+    ("Mean cost", "Mean cost / run", "USD billed via OpenRouter"),
+)
+
+
+def _draw_panel(
+    ax,
+    *,
+    panel_title: str,
+    columns: list[dict],
+    best_idx: int,
+    show_header: bool,
+) -> None:
+    """Draw one (3-column-ish) sub-table onto ``ax``."""
+    ax.set_facecolor("#0b0f14")
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.set_axis_off()
+
+    left_pad = 0.02
+    right_pad = 0.02
+    label_col_w = 0.28
+    n_cols = len(columns)
+    col_gap = 0.012
+    data_w = 1 - left_pad - right_pad - label_col_w - col_gap * n_cols
+    col_w = data_w / max(n_cols, 1)
+
+    header_y = 0.86 if show_header else 0.93
+    rows_top = 0.74 if show_header else 0.80
+    rows_bot = 0.06
+    n_rows = len(_ROW_SPECS)
+    row_h = (rows_top - rows_bot) / n_rows
+
+    # Panel title (the base-model name) along the left.
+    if panel_title:
+        ax.text(left_pad, 0.96, panel_title, transform=ax.transAxes,
+                fontsize=12, color="#9ba6b2", ha="left", va="top", style="italic")
+
+    # Column headers.
+    if show_header:
+        ax.text(left_pad, header_y, "Benchmark", transform=ax.transAxes,
+                fontsize=11, color="#9ba6b2", ha="left", va="center")
+    for i, col in enumerate(columns):
+        x0 = left_pad + label_col_w + col_gap + i * (col_w + col_gap)
+        x_center = x0 + col_w / 2
+        is_best = (i == best_idx)
+        color_primary = "#4ea1ff" if is_best else "#e6edf3"
+        if show_header:
+            ax.text(x_center, header_y + 0.04, col["primary"], transform=ax.transAxes,
+                    fontsize=13, color=color_primary, weight="bold", ha="center", va="center")
+            ax.text(x_center, header_y - 0.025, col["subtitle"], transform=ax.transAxes,
+                    fontsize=9, color="#9ba6b2", ha="center", va="center")
+
+    # Header divider.
+    if show_header:
+        ax.plot([left_pad, 1 - right_pad], [header_y - 0.07, header_y - 0.07],
+                color="#2b3440", linewidth=1.2, transform=ax.transAxes)
+
+    # Rows.
+    for r_idx, (key, row_label, row_sub) in enumerate(_ROW_SPECS):
+        y_center = rows_top - row_h * (r_idx + 0.5)
+
+        ax.text(left_pad, y_center + row_h * 0.18, row_label, transform=ax.transAxes,
+                fontsize=11.5, color="#e6edf3", ha="left", va="center", weight="bold")
+        ax.text(left_pad, y_center - row_h * 0.20, row_sub, transform=ax.transAxes,
+                fontsize=8.5, color="#7a8390", ha="left", va="center")
+
+        if r_idx < n_rows - 1:
+            y_div = y_center - row_h / 2
+            ax.plot([left_pad, 1 - right_pad], [y_div, y_div],
+                    color="#1a2027", linewidth=0.8, transform=ax.transAxes)
+
+        for i, col in enumerate(columns):
+            val = col["metrics"][key]
+            x0 = left_pad + label_col_w + col_gap + i * (col_w + col_gap)
+            x_center = x0 + col_w / 2
+            is_best = (i == best_idx)
+            color = "#4ea1ff" if is_best else "#e6edf3"
+            if val is None:
+                text = "—"
+            elif key == "Mean cost":
+                text = f"${val:.3f}"
+            else:
+                text = f"{100 * val:.1f}"
+            ax.text(x_center, y_center, text, transform=ax.transAxes,
+                    fontsize=20, color=color, ha="center", va="center",
+                    weight="semibold" if is_best else "normal")
+
+
+def benchmark_table_chart(
+    agg_rows: Sequence[dict],
+    out_png: str | Path,
+    *,
+    title: str = "HiveMind: context injection on bug-fix tasks",
+) -> Path:
+    """Render a release-paper-style benchmark table.
+
+    One panel per base model. Within each panel: columns = injection policies
+    (No Injection / Keyword Trigger / HiveMind Hybrid / ...), rows = task
+    difficulty tiers + Overall success + Mean cost. The strongest column in
+    each panel is highlighted in blue, à la *Muse Spark Contemplating* in the
+    reference shot.
+    """
+    try:
+        import matplotlib.pyplot as plt
+    except ImportError as e:  # pragma: no cover
+        raise RuntimeError(
+            "matplotlib not installed. Install with: pip install -e '.[dev]'"
+        ) from e
+
+    out = Path(out_png)
+    out.parent.mkdir(parents=True, exist_ok=True)
+
+    cells: list[tuple[str, str]] = sorted({(r["model"], r["policy"]) for r in agg_rows})
+    if not cells:
+        fig, ax = plt.subplots(figsize=(8, 3), facecolor="#0b0f14")
+        ax.set_facecolor("#0b0f14")
+        ax.text(0.5, 0.5, "No data", color="#cccccc", ha="center", va="center", fontsize=16)
+        ax.set_axis_off()
+        fig.savefig(out, dpi=160, facecolor=fig.get_facecolor())
+        plt.close(fig)
+        return out
+
+    # Group by base model; one panel per model.
+    models = sorted({m for m, _ in cells})
+
+    panels: list[dict] = []
+    for model in models:
+        cols = []
+        for policy in sorted({p for m, p in cells if m == model}):
+            primary, subtitle = _column_label(policy)
+            cols.append({
+                "policy": policy,
+                "primary": primary,
+                "subtitle": subtitle,
+                "metrics": _per_tier_success(agg_rows, policy=policy, model=model),
+            })
+
+        def _score(col: dict) -> tuple[float, float]:
+            ov = col["metrics"]["Overall"] or 0.0
+            mc = col["metrics"]["Mean cost"] or 0.0
+            return (ov, -mc)
+
+        best_idx = max(range(len(cols)), key=lambda i: _score(cols[i]))
+        panels.append({"model": model, "columns": cols, "best_idx": best_idx})
+
+    # Figure: one row per panel, title row at the top.
+    n_panels = len(panels)
+    fig_w = 12.0
+    fig_h = 1.4 + 4.2 * n_panels
+    fig, axes = plt.subplots(
+        n_panels + 1, 1,
+        figsize=(fig_w, fig_h),
+        facecolor="#0b0f14",
+        gridspec_kw={"height_ratios": [0.5] + [4.0] * n_panels, "hspace": 0.15},
+    )
+    if n_panels + 1 == 1:
+        axes = [axes]
+
+    # Title strip.
+    title_ax = axes[0]
+    title_ax.set_facecolor("#0b0f14")
+    title_ax.set_axis_off()
+    title_ax.text(0.02, 0.55, title, transform=title_ax.transAxes,
+                  fontsize=16, color="#e6edf3", weight="bold", ha="left", va="center")
+    title_ax.text(0.02, 0.05, "Bug-fix tasks across 14 self-contained repos. "
+                              "Columns are context-injection policies; rows are difficulty tiers.",
+                  transform=title_ax.transAxes, fontsize=10, color="#7a8390",
+                  ha="left", va="center")
+
+    for i, panel in enumerate(panels):
+        _draw_panel(
+            axes[i + 1],
+            panel_title=_short_model(panel["model"]),
+            columns=panel["columns"],
+            best_idx=panel["best_idx"],
+            show_header=True,
+        )
+
+    fig.savefig(out, dpi=170, facecolor=fig.get_facecolor(), bbox_inches="tight")
+    plt.close(fig)
+    return out
 
 
 def perf_vs_cost_chart(agg: dict, out_png: str | Path) -> Path:

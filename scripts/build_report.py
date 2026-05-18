@@ -13,9 +13,9 @@ from pathlib import Path
 
 from hivemind.eval.report import (
     aggregate,
+    benchmark_table_chart,
     load_sweep_csv,
     markdown_report,
-    perf_vs_cost_chart,
 )
 
 
@@ -37,7 +37,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     out_md = args.out_md or args.sweep_csv.with_suffix(".report.md")
-    out_png = args.out_png or args.sweep_csv.with_suffix(".perf_vs_cost.png")
+    out_png = args.out_png or args.sweep_csv.with_suffix(".benchmark.png")
 
     rows = load_sweep_csv(args.sweep_csv)
     agg = aggregate(rows, baseline_policy=args.baseline_policy)
@@ -47,7 +47,11 @@ def main(argv: list[str] | None = None) -> int:
     out_md.write_text(md)
     print(f"Wrote markdown report: {out_md}")
 
-    chart_path = perf_vs_cost_chart(agg, out_png)
+    chart_path = benchmark_table_chart(
+        rows,
+        out_png,
+        title=args.title or "HiveMind: context injection on bug-fix tasks",
+    )
     print(f"Wrote chart: {chart_path}")
     return 0
 

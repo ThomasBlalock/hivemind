@@ -11,6 +11,7 @@ from hivemind.eval.report import (
     aggregate,
     load_sweep_csv,
     markdown_report,
+    benchmark_table_chart,
     perf_vs_cost_chart,
 )
 
@@ -124,6 +125,14 @@ def test_perf_vs_cost_chart_writes_png(tmp_path: Path):
     agg = aggregate(_sample_rows())
     out_png = tmp_path / "chart.png"
     perf_vs_cost_chart(agg, out_png)
+    assert out_png.exists()
+    assert out_png.stat().st_size > 0
+
+
+def test_benchmark_table_chart_writes_png(tmp_path: Path):
+    rows = _sample_rows()
+    out_png = tmp_path / "bench.png"
+    benchmark_table_chart(rows, out_png)
     assert out_png.exists()
     assert out_png.stat().st_size > 0
 
